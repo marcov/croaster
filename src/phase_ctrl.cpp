@@ -16,28 +16,28 @@
 //
 // Contributor:  Jim Gallt
 //
-// Redistribution and use in source and binary forms, with or without modification, are 
+// Redistribution and use in source and binary forms, with or without modification, are
 // permitted provided that the following conditions are met:
 //
-//   Redistributions of source code must retain the above copyright notice, this list of 
+//   Redistributions of source code must retain the above copyright notice, this list of
 //   conditions and the following disclaimer.
 //
-//   Redistributions in binary form must reproduce the above copyright notice, this list 
-//   of conditions and the following disclaimer in the documentation and/or other materials 
+//   Redistributions in binary form must reproduce the above copyright notice, this list
+//   of conditions and the following disclaimer in the documentation and/or other materials
 //   provided with the distribution.
 //
-//   Neither the name of the copyright holder nor the names of the contributors may be 
-//   used to endorse or promote products derived from this software without specific prior 
+//   Neither the name of the copyright holder nor the names of the contributors may be
+//   used to endorse or promote products derived from this software without specific prior
 //   written permission.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
-// OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-// MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL 
-// THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
-// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+// OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+// THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ------------------------------------------------------------------------------------------
 
@@ -79,7 +79,7 @@ uint16_t phase_delay[101] = { // 60Hz values based on linearizing power output
 /* 70 */  6607,  6514,  6419,  6323,  6226,  6127, 6027,  5924,  5820,  5714,
 /* 80 */  5605,  5494,  5380,  5263,  5142,  5017, 4888,  4754,  4615,  4469,
 /* 90 */  4315,  4153,  3979,  3793,  3590,  3366, 3113,  2816,  2449,  1933,
-/* 100 */ 0	
+/* 100 */ 0
 };
 #else //ifdef FREQ50
 uint16_t phase_delay[101] = { // 50Hz values based on linearizing power output
@@ -94,13 +94,13 @@ uint16_t phase_delay[101] = { // 50Hz values based on linearizing power output
 /* 70 */  7928,  7816,  7703,  7588,  7471,  7353,  7232,  7109,  6984,  6857,
 /* 80 */  6726,  6593,  6456,  6315,  6170,  6021,  5866,  5705,  5538,  5362,
 /* 90 */  5178,  4983,  4775,  4552,  4308,  4039,  3735,  3379,  2939,  2320,
-/* 100 */ 0	
+/* 100 */ 0
 };
 #endif
 
 // timer1 is used for both phase delay and for TRIAC pulse width timing
 void setupTimer1() {
-  TIMSK1 = 0; // disable all interrupts 
+  TIMSK1 = 0; // disable all interrupts
   TCCR1A =  0; // put timer1 in normal mode; output pins under sketch control
   TCCR1B = _BV(TCCR1B_CS11); // set prescaler to clk/8 (1 count = 0.5 uS)
   OCR1A = 0xFFFF; // initialize output compare register A to max value
@@ -119,18 +119,18 @@ void ISR_ZCD() {
     digitalWrite( OT_PAC, LOW ); // force output off
   // set output compare register A for delay time
   OCR1A = phase_delay[pac_output] + uint16_t(ZC_LEAD);
-  
+
   // next, handle the integral cycle control output using modified Bresenham's algorithm
   // (inspired by post on arduino.cc forum by jwatte on 10-12-2011 -- Thanks!)
   if( newN ) {
-    // restart sequence if new output level    
+    // restart sequence if new output level
     curr = int8_t ( - ( int16_t( int16_t(ratioN) + int16_t(RATIO_M) ) ) / 2 );
     newN = false;
   }
   curr += ratioN;
   if( curr >= 0 ) {
     curr -= RATIO_M;
-    if( outputEnable ) 
+    if( outputEnable )
       digitalWrite( OT_ICC, HIGH );
   }
   else {
@@ -141,7 +141,7 @@ void ISR_ZCD() {
 // ------------------------ ISR for comparator A match
 ISR( TIMER1_COMPA_vect ) { // this gets called every time there is a match on A
   // if triac output is delaying, then
-  if( triac_state == delaying ) {  
+  if( triac_state == delaying ) {
     triac_state = pulse_on; // indicate output pulse is active
     if( outputEnable )
       digitalWrite( OT_PAC, HIGH );
@@ -169,13 +169,13 @@ void init_control() {
   attachInterrupt( EXT_INT, ISR_ZCD, FALLING );
 }
 
-// call this to set phase angle control output levels, 0 to 100 
+// call this to set phase angle control output levels, 0 to 100
 void output_level_pac( uint8_t pac_level ) {
   ///if( pac_level < HTR_CUTOFF_FAN_VAL ) { // if new levelOT2 < cutoff value then turn off OT1
   ///  output_level_icc( 0 );
  ///}
  ///else {  // turn OT1 back on again if levelOT2 is above cutoff value. Might be a better way to handle this??
-    ///output_level_icc( levelOT1 );    
+    ///output_level_icc( levelOT1 );
   ///}
   if( pac_level > 100 ) // trap error condition
     pac_output = 0;
@@ -183,7 +183,7 @@ void output_level_pac( uint8_t pac_level ) {
     pac_output = pac_level;
 }
 
-// call this to set integral cycle control output levels, 0 to 100 
+// call this to set integral cycle control output levels, 0 to 100
 void output_level_icc( uint8_t icc_level ) {
   //if( FAN_DUTY < HTR_CUTOFF_FAN_VAL ) icc_level = 0;
   if( icc_level > 100 )

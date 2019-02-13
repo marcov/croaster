@@ -4,14 +4,14 @@
 // Copyright 2013 - Under creative commons license 3.0:
 //        Attribution-ShareAlike CC BY-SA
 //
-// This software is furnished "as is", without technical support, and with no 
+// This software is furnished "as is", without technical support, and with no
 // warranty, express or implied, as to its usefulness for any purpose.
 //
 // @file LiquidCrystal_SR1W.h
 // Connects a hd44780 LCD using 1 pin from the Arduino, via an 8-bit Latching
 // ShiftRegister (SR1W from now on).
-// 
-// @brief 
+//
+// @brief
 // This is the 1 wire shift register interface class for the LCD library
 //
 // The functionality provided by this class and its base class is a superset of
@@ -45,7 +45,7 @@
 //    "gate" the output of which is NAND'd with VCC using a resistor-NPN-resistor "gate".
 //    So, /CLR = ((QH AND Q'H) NAND VCC).  We also put a capacitor on the NPN base to GND
 //    to delay the signal a bit and allow the Latch and EN signals some extra time to trigger.
-//    
+//
 //    This all fits together as follows:
 //      1. We shift in a '1'.
 //      2. Ws shift in the other 7 bits.
@@ -154,7 +154,7 @@
 //             |         |         |         /   |       1k
 //             |    +--8-|GND   Q'H|--9-----+    |
 //             |    |    +---------+        |    |         (GND)--(LCD RW)
-//             |    |      0.1uF            |     \
+//             |    |      0.1uF            |    \-
 //             |  (GND)-----||----(VCC)     +------)--------------(LCD EN)
 //             |                            |     /
 //             |----|<|----+--[ Resistor ]--|    |
@@ -302,73 +302,73 @@ class LiquidCrystal_SR1W : public LCD
 {
 public:
    /*!
-    @method     
+    @method
     @abstract   LCD 1 wire SHIFT REGISTER constructor.
     @discussion Defines the pin assignments that connect to the shift register.
-    The constructor does not initialize the LCD. Assuming 1 line 8 pixel high 
+    The constructor does not initialize the LCD. Assuming 1 line 8 pixel high
     font.
-    
+
     @param srdata[in]       Arduino pin for shift register.
     @param circuitType[in]  optionally select an alternate circuit type
     @param blpol[in]        optional backlight polarity (default = POSITIVE)
     */
-   LiquidCrystal_SR1W (uint8_t srdata, t_sr1w_circuitType circuitType, 
+   LiquidCrystal_SR1W (uint8_t srdata, t_sr1w_circuitType circuitType,
                        t_backlighPol blpol = POSITIVE);
-   
+
    /*!
     @function
     @abstract   Send a particular value to the LCD.
     @discussion Sends a particular value to the LCD for writing to the LCD or
     as an LCD command using the shift register.
-    
+
     Users should never call this method.
-    
+
     @param      value[in] Value to send to the LCD.
     @param      mode[in]  DATA=8bit data, COMMAND=8bit cmd, FOUR_BITS=4bit cmd
     the LCD.
     */
    virtual void send(uint8_t value, uint8_t mode);
-   
-   
+
+
    /*!
     @function
     @abstract   Switch-on/off the LCD backlight.
     @discussion Switch-on/off the LCD backlight.
     The setBacklightPin has to be called before setting the backlight for
     this method to work. @see setBacklightPin.
-    
+
     @param      mode[in] backlight mode (0 off, non-zero on)
     */
    void setBacklight ( uint8_t mode );
-   
+
 private:
-   
+
    /*!
-    @method     
+    @method
     @abstract   Initializes the LCD pin allocation
     @discussion Initializes the LCD pin allocation and configuration.
     */
-   void init ( uint8_t srdata, t_sr1w_circuitType circuitType, t_backlighPol blpol, 
+   void init ( uint8_t srdata, t_sr1w_circuitType circuitType, t_backlighPol blpol,
                uint8_t lines, uint8_t font );
-   
+
    /*!
-    @method     
-    @abstract Clears the shift register to ensure the Latch/Enable pins aren't 
+    @method
+    @abstract Clears the shift register to ensure the Latch/Enable pins aren't
     triggered accidentally.
     */
    uint8_t clearSR ();
-   
+
    /*!
     * @method
     * @abstract takes care of shifting and the enable pulse
     */
    uint8_t loadSR (uint8_t val);
-   
+
    fio_register _srRegister; // Serial PIN
    fio_bit _srMask;
-   
+
    t_sr1w_circuitType _circuitType;
-   
+
    uint8_t _blPolarity;
    uint8_t _blMask;
 };

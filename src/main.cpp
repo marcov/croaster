@@ -263,7 +263,7 @@ uint32_t checktime;
 
 #endif
 
-uint32_t counter; // second counter
+int counter; // second counter
 uint32_t next_loop_time; //
 boolean first;
 uint16_t looptime = 1000;
@@ -522,7 +522,6 @@ void get_samples() // this function talks to the amb sensor and ADC via I2C
   int32_t v;
   tcBase * tc;
   float tempF;
-  int32_t itemp;
   float rx;
 
   uint16_t dly = amb.getConvTime(); // use delay based on slowest conversion
@@ -938,10 +937,10 @@ void updateSetpoint() { //read profile data from EEPROM and calculate new setpoi
 
     float x = (float)( counter - times[0] ) / (float)( times[1] - times[0] ); // can probably be tidied up?? Calcs proportion of time through current profile interval
     Setpoint = temps[0] + x * ( temps[1] - temps[0] );  // then applies the proportion to the temps
-    if( profile_CorF == 'F' && Cscale ) { // make setpoint units match current units
+    if( (profile_CorF == 'F') && Cscale ) { // make setpoint units match current units
       Setpoint = convertUnits( Setpoint ); // convert F to C
     }
-    else if( profile_CorF == 'C' & !Cscale) { // make setpoint units match current units
+    else if( (profile_CorF == 'C') && !Cscale) { // make setpoint units match current units
       Setpoint = Setpoint * 9 / 5 + 32; // convert C to F
     }
   }

@@ -36,7 +36,6 @@
 // ------------------------------------------------------------------------------------------
 
 // Version 1.10
-
 #include "cmndreader.h"
 
 // define command objects (all are derived from CmndBase)
@@ -260,8 +259,8 @@ boolean ot1Cmnd::doCommand( CmndParser* pars ) {
       return true;
     }
     else if( strcmp( pars->paramStr(1), "DOWN" ) == 0 ) {
-      levelOT1 = levelOT1 - DUTY_STEP;
-      if( levelOT1 < MIN_OT1 & levelOT1 != 0 ) levelOT1 = 0; // turn ot1 off if trying to go below minimum. or use levelOT1 = MIN_HTR ?
+      levelOT1 -= DUTY_STEP;
+      if (levelOT1 < MIN_OT1)   levelOT1 = 0; // turn ot1 off if trying to go below minimum
         outOT1();
       #ifdef ACKS_ON
       Serial.print(F("# OT1 level set to ")); Serial.println( levelOT1 );
@@ -271,9 +270,14 @@ boolean ot1Cmnd::doCommand( CmndParser* pars ) {
     else {
       uint8_t len = strlen( pars->paramStr(1) );
       if( len > 0 ) {
-        levelOT1 = atoi( pars->paramStr(1) );
-        if( levelOT1 > MAX_OT1 ) levelOT1 = MAX_OT1;  // don't allow OT1 to exceed maximum
-        if( levelOT1 < MIN_OT1 & levelOT1 != 0 ) levelOT1 = MIN_OT1;  // don't allow to set less than minimum unless setting to zero
+        auto val = atoi( pars->paramStr(1) );
+        if (val >= MAX_OT1) {
+            val = MAX_OT1;
+        } else if (val < MIN_OT1 && val != 0) {
+            val = MIN_OT1;
+        }
+
+        levelOT1 = val;
           outOT1();
         #ifdef ACKS_ON
         Serial.print(F("# OT1 level set to ")); Serial.println( levelOT1 );
@@ -299,7 +303,7 @@ ot2Cmnd::ot2Cmnd() :
 boolean ot2Cmnd::doCommand( CmndParser* pars ) {
   if( strcmp( keyword, pars->cmndName() ) == 0 ) {
     if( strcmp( pars->paramStr(1), "UP" ) == 0 ) {
-      levelOT2 = levelOT2 + DUTY_STEP;
+      levelOT2 += DUTY_STEP;
       if( levelOT2 > MAX_OT2 ) levelOT2 = MAX_OT2; // don't allow OT2 to exceed maximum
       if( levelOT2 < MIN_OT2 ) levelOT2 = MIN_OT2; // don't allow OT2 to turn on less than minimum
         outOT2();
@@ -309,8 +313,8 @@ boolean ot2Cmnd::doCommand( CmndParser* pars ) {
       return true;
     }
     else if( strcmp( pars->paramStr(1), "DOWN" ) == 0 ) {
-      levelOT2 = levelOT2 - DUTY_STEP;
-      if( levelOT2 < MIN_OT2 & levelOT2 != 0 ) levelOT2 = 0;  // turn off if selecting less than minimum. or use levelOT2 = MIN_FAN ?
+      levelOT2 -= DUTY_STEP;
+      if(levelOT2 < MIN_OT2) levelOT2 = 0;  // turn off if selecting less than minimum.
         outOT2();
       #ifdef ACKS_ON
       Serial.print(F("# OT2 level set to ")); Serial.println( levelOT2 );
@@ -320,10 +324,15 @@ boolean ot2Cmnd::doCommand( CmndParser* pars ) {
     else {
       uint8_t len = strlen( pars->paramStr(1) );
       if( len > 0 ) {
-        levelOT2 = atoi( pars->paramStr(1) );
-        if( levelOT2 > MAX_OT2 ) levelOT2 = levelOT2;  // don't allow OT2 to exceed maximum
-        if( levelOT2 < MIN_OT2 & levelOT2 != 0 ) levelOT2 = MIN_OT2;  // don't allow to set less than minimum unless setting to zero
-          outOT2();
+        auto val = atoi( pars->paramStr(1) );
+        if (val >= MAX_OT2) {
+            val = MAX_OT2;
+        } else if (val < MIN_OT2 && val != 0) {
+            val = MIN_OT2;
+        }
+
+        levelOT2 = val;
+        outOT2();
         #ifdef ACKS_ON
         Serial.print(F("# OT2 level set to ")); Serial.println( levelOT2 );
         #endif
@@ -362,8 +371,8 @@ boolean io3Cmnd::doCommand( CmndParser* pars ) {
       return true;
     }
     else if( strcmp( pars->paramStr(1), "DOWN" ) == 0 ) {
-      levelIO3 = levelIO3 - DUTY_STEP;
-      if( levelIO3 < MIN_IO3 & levelIO3 != 0 ) levelIO3 = 0; // turn IO3 off if trying to go below minimum.
+      levelIO3 -= DUTY_STEP;
+      if (levelIO3 < MIN_IO3)   levelIO3 = 0;  // turn off if trying to go below minimum
         outIO3();
       #ifdef ACKS_ON
       Serial.print(F("# IO3 level set to ")); Serial.println( levelIO3 );
@@ -464,25 +473,28 @@ unitsCmnd::unitsCmnd() :
 // UNITS;F\n or UNITS;C\n
 
 boolean unitsCmnd::doCommand( CmndParser* pars ) {
-  if( strcmp( keyword, pars->cmndName() ) == 0 ) {
-    if( strcmp( pars->paramStr(1), "F" ) == 0 ) {
-      Cscale = false;
-      #ifdef ACKS_ON
-      Serial.println(F("# Changed units to F"));
-      #endif
-      return true;
-    }
-    else if( strcmp( pars->paramStr(1), "C" ) == 0 ) {
-      Cscale = true;
-      #ifdef ACKS_ON
-      Serial.println(F("# Changed units to C"));
-      #endif
-      return true;
-    }
+  if( strcmp( keyword, pars->cmndName() ) != 0 ) {
+      return false;
   }
-  else {
-    return false;
+
+  char unit;
+  sscanf(pars->paramStr(1), "%c", &unit);
+
+  if ((unit != 'F') && (unit != 'C')) {
+      return false;
   }
+
+  Cscale = (unit == 'C');
+
+#ifdef ACKS_ON
+  char buf[3] = {0, 0};
+  buf[0] = unit;
+
+  Serial.print(F("# Changed units to "));
+  Serial.println(buf);
+#endif
+
+  return true;
 }
 
 
@@ -515,7 +527,10 @@ void pidCmnd::pidOFF() {
 // PID;ON\n ;OFF\n ;TIME\n ;Pddd\n ;T;ddd;ddd;ddd;mode\n
 
 boolean pidCmnd::doCommand( CmndParser* pars ) {
-  if( strcmp( keyword, pars->cmndName() ) == 0 ) {
+    if( strcmp( keyword, pars->cmndName() ) != 0 ) {
+      return false;
+    }
+
     if( strcmp( pars->paramStr(1), "ON" ) == 0 ) {
       #ifdef PID_CONTROL
         pidON();
@@ -633,10 +648,8 @@ boolean pidCmnd::doCommand( CmndParser* pars ) {
       #endif
       return true;
     }
-  }
-  else {
+
     return false;
-  }
 }
 
 // ----------------------------- filtCmnd
@@ -806,4 +819,12 @@ boolean fanCmnd::doCommand( CmndParser* pars ) {
   }
 }
 #endif //ROASTLOGGER
+
+boolean pingCmnd::doCommand( CmndParser* pars ) {
+  if( strcmp( keyword, pars->cmndName() ) != 0 ) {
+    return false;
+  }
+  Serial.println(F("PONG"));
+  return true;
+}
 
