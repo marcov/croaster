@@ -4,7 +4,7 @@
 
 // *************************************************************************************
 // NOTE TO USERS: the following parameters should be
-// be reviewed to suit your preferences and hardware setup.  
+// be reviewed to suit your preferences and hardware setup.
 // First, load and edit this sketch in the Arduino IDE.
 // Next compile the sketch and upload it to the Arduino.
 
@@ -20,23 +20,23 @@
 
 ////////////////////
 // Base configurations (leave only one uncommented)
-//#define CONFIG_PWM // slow PWM on OT1 (heater); fast PWM output (3.922kHz) on IO3 (DC fan); ZCD not required
-#define CONFIG_PAC2 // phase angle control on OT1 (heater) and OT2 (fan); IO2 used to read the ZCD
+#define CONFIG_PWM // slow PWM on OT1 (heater); fast PWM output (3.922kHz) on IO3 (DC fan); ZCD not required
+//#define CONFIG_PAC2 // phase angle control on OT1 (heater) and OT2 (fan); IO2 used to read the ZCD
 //#define CONFIG_PAC2_IO3HTR // phase angle control on OT1 (heater) and OT2 (fan); IO2 reads the req'd ZCD; IO3 reserved for fast PWM output for heater
 //#define CONFIG_PAC3 // phase angle control on OT1 (heater) and OT2 (fan); IO3 reads the req'd ZCD; IO3 not available for output
 
 ////////////////////
 // Temperature Unit
-//#define CELSIUS // controls only the initial conditions.  Comment out for F.
+#define CELSIUS // controls only the initial conditions.  Comment out for F.
 
 ////////////////////
 // LCD Options
 // Choose ONE of the following LCD options if using an LCD
 //#define LCDAPTER // if the I2C LCDapter board is to be used
-#define LCD_I2C // if using a $5 delivered Chinese LCD with I2C module
+//#define LCD_I2C // if using a $5 delivered Chinese LCD with I2C module
 //#define LCD_PARALLEL // if using a parallel LCD screen
 
-#define LCD_4x20 // if using a 4x20 LCD instead of a 2x16
+//#define LCD_4x20 // if using a 4x20 LCD instead of a 2x16
 
 #define LCD_I2C_ADDRESS 0x27 // adjust I2C address for LCD if required. Try 0x3F, 0x20. Not used for LCDapter.
 
@@ -57,8 +57,8 @@
 /////////////////////
 // AC Power Options
 // Needed for CONFIG_PAC options
-#define FREQ60 // 60Hz
-//#define FREQ50 // 50Hz
+//#define FREQ60 // 60Hz
+#define FREQ50 // 50Hz
 
 ////////////////////
 // Thermocouple Input Options
@@ -156,7 +156,7 @@
 #define TIME_BASE pwmN1Hz  // recommended for most electric heaters controlled by standard SSR
 //#define TIME_BASE pwmN2Hz
 //#define TIME_BASE pwmN4Hz
-//#define TIME_BASE pwmN8Hz 
+//#define TIME_BASE pwmN8Hz
 // The faster frequencies below are for advanced users only, and will require changes to the PWM16 Library
 //#define TIME_BASE 15 // approx. 977 Hz
 //#define TIME_BASE 7 // approx. 1.95kHz
