@@ -1427,6 +1427,7 @@ void setup()
   ci.addCommand( &fan );
 #endif
   ci.addCommand( &filt );
+  ci.addCommand( &ping );
 
 #if ( !defined( PHASE_ANGLE_CONTROL ) ) || ( INT_PIN != 3 ) // disable when PAC active and pin 3 reads the ZCD
   dcfan.init(); // initialize conditions for dcfan
@@ -1579,5 +1580,16 @@ void loop()
   // Set next loop time and increment counter
   next_loop_time = next_loop_time + looptime; // add time until next loop
   counter = counter + ( looptime / 1000 ); if( counter > 3599 ) counter = 3599;
+
+#if 0
+  {
+      static uint32_t checktime;
+      uint32_t now = millis();
+      if( now - checktime > 1000 ) {
+          Serial.println(F("# I AM ALIVE"));
+          checktime = now;
+      }
+  }
+#endif
 }
 

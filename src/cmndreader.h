@@ -73,6 +73,7 @@
 #endif
 #define FILT_CMD "FILT" // runtime changes to digital filtering on input channels
 #define FAN_PORT 3 // use DI03 for PWM fan output
+#define PING_CMD "PING"
 
 // -------------------------- slew rate limitations for fan control
 #define MAX_SLEW 25 // percent per second
@@ -100,6 +101,7 @@ class powerCmnd;
 class fanCmnd;
 #endif
 class filtCmnd;
+class pingCmnd;
 
 // external declarations of class objects
 extern readCmnd reader;
@@ -121,6 +123,7 @@ extern powerCmnd power;
 extern fanCmnd fan;
 #endif
 extern filtCmnd filt;
+extern pingCmnd ping;
 
 
 // extern declarations for functions, variables in the main program
@@ -253,4 +256,13 @@ class fanCmnd : public CmndBase {
 };
 
 #endif
+
+class pingCmnd : public CmndBase {
+  public:
+    pingCmnd() :
+        CmndBase( PING_CMD )
+    {}
+
+    boolean doCommand( CmndParser* pars );
+};
 

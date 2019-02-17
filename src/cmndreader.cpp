@@ -58,7 +58,78 @@ powerCmnd power;
 fanCmnd fan;
 #endif
 filtCmnd filt;
+pingCmnd ping;
 
+
+//#define GENERIC_OT_CMD
+#if defined(GENERIC_OT_CMD)
+class genericOut : public CmndBase {
+  private:
+    const int out, min_ot, max_ot, step, level;
+
+  public:
+    genericOut(const char *cmd, int _out, int _min, int _max, int _step) :
+        CmndBase(cmd),
+        out(_out),
+        min_ot(_min),
+        max_ot(_max),
+        step(_step),
+        level(_min)
+    {};
+
+    boolean doCommand( CmndParser* pars );
+};
+
+
+boolean genericOut::doCommand( CmndParser* pars ) {
+  if( strcmp( keyword, pars->cmndName() ) == 0 ) {
+    if( strcmp( pars->paramStr(1), "UP" ) == 0 ) {
+      level = level + step;
+      if( level > max ) level = max; // don't allow OT1 to exceed maximum
+      if( level < min ) level = min; // don't allow OT1 to turn on less than minimum
+        outOT1();
+      #ifdef ACKS_ON
+      Serial.print(F("# OT1 level set to ")); Serial.println( level );
+      #endif
+      return true;
+    }
+    else if( strcmp( pars->paramStr(1), "DOWN" ) == 0 ) {
+      level -= step;
+      if (level < min)   level = min; // turn ot1 off if trying to go below minimum
+        outOT1();
+      #ifdef ACKS_ON
+      Serial.print(F("# OT1 level set to ")); Serial.println( level );
+      #endif
+      return true;
+    }
+    else {
+      uint8_t len = strlen( pars->paramStr(1) );
+      if( len > 0 ) {
+        auto val = atoi( pars->paramStr(1) );
+        if (val >= max) {
+            val = max;
+        } else if (val <= min) {
+            val = min;
+        }
+
+        level = val;
+        outOT1();
+        #ifdef ACKS_ON
+        Serial.print(F("# OT1 level set to ")); Serial.println( level );
+        #endif
+      }
+      return true;
+    }
+  }
+  else {
+    return false;
+  }
+}
+genericOut gOts[] = {
+    genericOut{OT1_CMD, OT1, MIN_OT1, MAX_OT1, DUTY_STEP},
+    genericOut{OT2_CMD, OT2, MIN_OT2, MAX_OT2, DUTY_STEP},
+};
+#endif
 
 // --------------------- dwriteCmnd
 // constructor
