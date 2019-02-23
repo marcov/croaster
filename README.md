@@ -1,17 +1,26 @@
 ## croaster
 
-croaster is a fork of the [TC4 aArtisan (PID) firmware](https://github.com/greencardigan/TC4-shield/tree/master/applications/Artisan/)
-for the Arduino Uno.
+**croaster** is a fork of the TC4 aArtisan (PID) firmware for the Arduino Uno,
+ak.a. [aArtisan_PID](https://github.com/greencardigan/TC4-shield/tree/master/applications/Artisan/).
 
-It is used together with [Artisan](https://github.com/artisan-roaster-scope/artisan)
-to automate and control coffee roasting.
+It can used together with [Artisan](https://github.com/artisan-roaster-scope/artisan)
+to log, control and automate coffee roasting.
 
 The initial goal of this fork is to refactor and clean up the original aArtisan
 code.
 
 ## Initial setup
-You will need:
-- platform.io (cli version is enough)
+You need:
+-  [PlatformIO Core](https://platformio.org/install/cli)
+
+
+## Building and flashing the firmware
+From project root:
+- Build the firmware with `make`
+- Upload the firmware with `make upload`.
+
+Refer to PlatformIO documentation for more information on customizing the build
+environment (platformio.ini file).
 
 ### More Information
 
