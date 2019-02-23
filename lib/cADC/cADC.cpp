@@ -9,32 +9,32 @@
 //
 // Contributor:  Jim Gallt
 //
-// Redistribution and use in source and binary forms, with or without modification, are 
+// Redistribution and use in source and binary forms, with or without modification, are
 // permitted provided that the following conditions are met:
 //
-//   Redistributions of source code must retain the above copyright notice, this list of 
+//   Redistributions of source code must retain the above copyright notice, this list of
 //   conditions and the following disclaimer.
 //
-//   Redistributions in binary form must reproduce the above copyright notice, this list 
-//   of conditions and the following disclaimer in the documentation and/or other materials 
+//   Redistributions in binary form must reproduce the above copyright notice, this list
+//   of conditions and the following disclaimer in the documentation and/or other materials
 //   provided with the distribution.
 //
-//   Neither the name of the MLG Properties, LLC nor the names of its contributors may be 
-//   used to endorse or promote products derived from this software without specific prior 
+//   Neither the name of the MLG Properties, LLC nor the names of its contributors may be
+//   used to endorse or promote products derived from this software without specific prior
 //   written permission.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
-// OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-// MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL 
-// THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
-// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+// OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+// THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+// HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // ------------------------------------------------------------------------------------------
 
-// Acknowledgement is given to Bill Welch for his development of the prototype hardware and software 
+// Acknowledgement is given to Bill Welch for his development of the prototype hardware and software
 // upon which much of this library is based.
 
 // 20110609  Significant revision for flexibility in selecting modes of operation
@@ -42,6 +42,7 @@
 //  (thanks and acknowledgement to Arnaud Kodeck for his code contributions).
 
 #include "cADC.h"
+#include "misc.h"
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #define _READ read
@@ -126,36 +127,66 @@ void cADC::setCal( float gain, int8_t offs ) {
 // -----------------------------------------------------------
 int32_t cADC::readuV() {
   int32_t v;
+  uint8_t readbuf[ADC_MAX_NBYTES];
+  unsigned i;
   // resolution determines number of bytes requested
-  if( ( cfg & ADC_RES_MASK ) == ADC_BITS_18 ) { // 3 data bytes
-    Wire.requestFrom( a_adc, (uint8_t) 4 );
-    uint8_t a = Wire._READ(); // first data byte
-    uint8_t b = Wire._READ(); // second data byte
-    uint8_t c = Wire._READ(); // 3rd data byte
-    v = a;
-    v <<= 24; // v = a : 0 : 0 : 0
-    v >>= 16; // v = s : s : a : 0
-    v |= b; //   v = s : s : a : b
-    v <<= 8; //  v = s : a : b : 0
-    v |= c; //   v = s : a : b : c
+  unsigned readlen = ((cfg & ADC_RES_MASK) == ADC_BITS_18) ? 3 : 2;
+
+  ASSERT(readlen <= sizeof(readbuf));
+
+  if (Wire.requestFrom( a_adc, readlen) < readlen) {
+      // got less bytes than expected
+      errors++;
+      return -1;
   }
-  else { // 2 data bytes
-    Wire.requestFrom( a_adc, (uint8_t) 3 );
-    uint8_t a = Wire._READ(); // first data byte
-    uint8_t b = Wire._READ(); // second data byte
-    v = a;
-    v <<= 24; // v = a : 0 : 0 : 0
-    v >>= 16; // v = s : s : a : 0
-    v |= b; //   v = s : s : a : b
+
+  for (i = 0; i  < readlen; i++) {
+    readbuf[i] = Wire._READ();
   }
-  uint8_t stat = Wire._READ(); // read the status byte returned from the ADC
+
+  uint8_t stat = Wire._READ();
+
+  if (stat & ADC_NOT_RDY) {
+      errors++;
+      return -1;
+  }
+
+  for (; i < sizeof(readbuf); i++) {
+      readbuf[i] = 0;
+  }
+
+  // data format is big endian.
+  // place 1st data byte as most significant byte to keep  the sign
+  v = ((uint32_t)readbuf[0] << 24) | ((uint32_t)readbuf[1] << 16) | ((uint32_t)readbuf[2] << 8);
+
+  //shift to the correct value keeping sign
+  v >>= (8 * (sizeof(v) - readlen));
+
   v *= 1000;  // convert to uV.  This cannot overflow ( 10 bits + 18 bits < 31 bits )
+
   // bit shift count for ADC gain
   uint8_t gn = stat & ADC_GAIN_MASK;
+
   // shift based on ADC resolution plus ADC gain
-  v >>= ( nLSB + gn ); // v = raw reading, uV
-  // calculate effect of external calibration gain; minimize loss of significance
-  int32_t deltaV = round( (float)v * cal_gain );
+  unsigned log2divisor = ( nLSB + gn ); // v = raw reading, uV
+
+  if (log2divisor > 0) {
+    // since we divide by shift, we always truncate the value.
+    // If the decimal MSB is set, decimal part is >= 0.5, so round up of 1 unit
+    int32_t rounding = (v & (log2divisor - 1));
+
+    v >>= log2divisor;
+
+    v += rounding;
+  }
+
+  int deltaV = 0;
+
+  if (cal_gain > 0.0) {
+    // calculate effect of external calibration gain; minimize loss of significance
+    deltaV = round( (float)v * cal_gain );
+  }
+
   return v + deltaV;  // returns corrected, unfiltered value of uV
 };
 
@@ -163,8 +194,19 @@ int32_t cADC::readuV() {
 void cADC::nextConversion( uint8_t chan ) {
   Wire.beginTransmission( a_adc );
   Wire._WRITE( cfg | ( ( chan & B00000011 ) << ADC_C0 ) );
-  Wire.endTransmission();
+  int ack = Wire.endTransmission();
+  ASSERT(ack==0);
 };
+
+// -------------------------------------
+bool cADC::hasErrors()  {
+    return (errors > 0);
+}
+
+// -------------------------------------
+void cADC::resetErrors()  {
+    errors = 0;
+}
 
 // ----------------------------------------------------------- ambSensor
 ambSensor::ambSensor( uint8_t addr ) {
