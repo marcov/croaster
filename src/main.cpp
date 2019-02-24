@@ -1352,15 +1352,11 @@ void setup()
   Serial.println(freeMemory());
 #endif
 
-  adc.setCal( CAL_GAIN, UV_OFFSET );
-  amb.setOffset( AMB_OFFSET );
-
   // read calibration and identification data from eeprom
   if( readCalBlock( eeprom, caldata ) ) {
     adc.setCal( caldata.cal_gain, caldata.cal_offset );
     amb.setOffset( caldata.K_offset );
-  }
-  else { // if there was a problem with EEPROM read, then use default values
+  } else { // if there was a problem with EEPROM read, then use default values
     adc.setCal( CAL_GAIN, UV_OFFSET );
     amb.setOffset( AMB_OFFSET );
   }
