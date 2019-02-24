@@ -137,7 +137,7 @@ int32_t cADC::readuV() {
   if (Wire.requestFrom( a_adc, readlen) < readlen) {
       // got less bytes than expected
       errors++;
-      return -1;
+      return INT32_MIN;
   }
 
   for (i = 0; i  < readlen; i++) {
@@ -148,7 +148,7 @@ int32_t cADC::readuV() {
 
   if (stat & ADC_NOT_RDY) {
       errors++;
-      return -1;
+      return INT32_MIN;
   }
 
   for (; i < sizeof(readbuf); i++) {
