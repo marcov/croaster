@@ -156,6 +156,7 @@
 //          Version 6_7 released
 
 #define BANNER_ARTISAN "aArtisanQ_PID 6_7"
+#define BANNER_CROASTER "cRoaster 1.0"
 
 // this library included with the arduino distribution
 #include <Wire.h>
@@ -1326,7 +1327,7 @@ void setup()
   #endif
     BACKLIGHT;
     lcd.setCursor( 0, 0 );
-    lcd.print( BANNER_ARTISAN ); // display version banner
+    lcd.print( BANNER_CROASTER ); // display version banner
     lcd.setCursor( 0, 1 );
   #ifdef ANDROID
     lcd.print( F("ANDROID") ); // display version banner
