@@ -128,6 +128,9 @@
 //#define ADC_DEBUG
 //#define ANALOG_DEBUG
 
+// ASSERT
+//#define ASSERT_ENABLED
+
 ////////////////////
 // Temperature Reading Filters
 #define BT_FILTER 10 // filtering level (percent) for BT
