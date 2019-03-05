@@ -33,7 +33,7 @@
 // LCD Options
 // Choose ONE of the following LCD options if using an LCD
 //#define LCDAPTER // if the I2C LCDapter board is to be used
-//#define LCD_I2C // if using a $5 delivered Chinese LCD with I2C module
+#define LCD_I2C // if using a $5 delivered Chinese LCD with I2C module
 //#define LCD_PARALLEL // if using a parallel LCD screen
 
 //#define LCD_4x20 // if using a 4x20 LCD instead of a 2x16
@@ -76,8 +76,8 @@
 ////////////////////
 // Analogue inputs (optional)
 // Comment out if not required
-//#define ANALOGUE1 // if potentiometer connected on ANLG1
-//#define ANALOGUE2 // if potentiometer connected on ANLG2
+#define ANALOGUE1 // if potentiometer connected on ANLG1
+#define ANALOGUE2 // if potentiometer connected on ANLG2
 
 ////////////////////
 // Duty Cycle Adjustment Increment
@@ -124,7 +124,9 @@
 
 ////////////////////
 // Serial Debug
-//#define CRSTR_SERIAL_DEBUG // Print debug information on serial
+#define CRSTR_SERIAL_DEBUG // Print debug information on serial
+//#define ADC_DEBUG
+//#define ANALOG_DEBUG
 
 ////////////////////
 // Temperature Reading Filters
@@ -138,7 +140,8 @@
 // or other roasters where BT might be jumpy, then a higher value of RISE_FILTER
 // will be needed.  Theoretical max. is 99%, but watch out for the lag when
 // you get above 95%.
-#define RISE_FILTER 85 // heavy filtering on non-displayed BT for RoR calculations
+#define RISE_FILTER 85 // heavy filtering on non-displayed BT for RoR calculationsC:w
+
 #define ROR_FILTER 80 // post-filtering for the computed RoR values
 
 // Thermocouple inputs
