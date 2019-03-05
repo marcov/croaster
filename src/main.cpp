@@ -191,7 +191,7 @@
   #include <LiquidCrystal_I2C.h>
 #endif
 
-#include "misc.h"
+#include "debug.h"
 
 // ------------------------ other compile directives
 #define MIN_DELAY 300   // ms between ADC samples (tested OK at 270)
@@ -549,7 +549,7 @@ void get_samples() // this function talks to the amb sensor and ADC via I2C
       amb.readSensor(); // retrieve value from ambient temp register
       v = adc.readuV(); // retrieve microvolt sample from MCP3424
       if (v == INT32_MIN) {
-          DEBUG_PRINTF("# adc read err\n");
+           ADC_PRINTF("# adc read err\n");
       }
 
       tempF = tc->Temp_F( 0.001 * v, amb.getAmbF() ); // convert uV to Celsius

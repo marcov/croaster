@@ -42,7 +42,7 @@
 //  (thanks and acknowledgement to Arnaud Kodeck for his code contributions).
 
 #include "cADC.h"
-#include "misc.h"
+#include "debug.h"
 
 #if defined(ARDUINO) && ARDUINO >= 100
 #define _READ read
