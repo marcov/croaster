@@ -839,20 +839,21 @@ int32_t getAnalogValue( uint8_t port ) {
 #endif
   float aval;
   aval = analogRead( port );
-  #ifdef ANALOGUE1
+  ANALOG_PRINTF("# an port %u: %ld\n", port, (int32_t)(aval * 1000.0f));
+#ifdef ANALOGUE1
     if( port == anlg1 ) {
       aval = min_anlg1 * 10.24 + ( aval / 1024 ) * 10.24 * ( max_anlg1 - min_anlg1 ) ; // scale analogue value to new range
       if ( aval == ( min_anlg1 * 10.24 ) ) aval = 0; // still allow OT1 to be switched off at minimum value. NOT SURE IF THIS FEATURE IS GOOD???????
       mod = min_anlg1;
     }
-  #endif
-  #ifdef ANALOGUE2
+#endif
+#ifdef ANALOGUE2
     if( port == anlg2 ) {
       aval = min_anlg2 * 10.24 + ( aval / 1024 ) * 10.24 * ( max_anlg2 - min_anlg2 ) ; // scale analogue value to new range
       if ( aval == ( min_anlg2 * 10.24 ) ) aval = 0; // still allow OT2 to be switched off at minimum value. NOT SURE IF THIS FEATURE IS GOOD???????
       mod = min_anlg2;
     }
-  #endif
+#endif
   trial = ( aval + 0.001 ) * 100; // to fix weird rounding error from previous calcs?????
   trial /= 1023;
   trial = ( trial / DUTY_STEP ) * DUTY_STEP; // truncate to multiple of DUTY_STEP
@@ -868,7 +869,6 @@ int32_t getAnalogValue( uint8_t port ) {
 #ifdef ANALOGUE1
 // ---------------------------------
 void readAnlg1() { // read analog port 1 and adjust OT1 output
-  char pstr[5];
   int32_t reading;
   reading = getAnalogValue( anlg1 );
   if( reading <= 100 && reading != old_reading_anlg1 ) { // did it change?
@@ -896,7 +896,6 @@ void readAnlg1() { // read analog port 1 and adjust OT1 output
 #ifdef ANALOGUE2
 // ---------------------------------
 void readAnlg2() { // read analog port 2 and adjust OT2 output
-  char pstr[5];
   int32_t reading;
   reading = getAnalogValue( anlg2 );
   if( reading <= 100 && reading != old_reading_anlg2 ) { // did it change?
@@ -1390,12 +1389,12 @@ void setup()
 // ----------------------------
 
 
-  #ifdef ANALOGUE1
+#ifdef ANALOGUE1
   old_reading_anlg1 = getAnalogValue( anlg1 ); // initialize old_reading with initial analogue value
-  #endif
-  #ifdef ANALOGUE2
+#endif
+#ifdef ANALOGUE2
   old_reading_anlg2 = getAnalogValue( anlg2 ); // initialize old_reading with initial analogue value
-  #endif
+#endif
 
   // initialize the active channels to default values
   actv[0] = 2; // ET on TC1
@@ -1515,16 +1514,17 @@ void loop()
   get_samples();
 
   // Read analogue POT values if defined
-  #ifdef ANALOGUE1
-    #ifdef PID_CONTROL
+#ifdef ANALOGUE1
+#ifdef PID_CONTROL
       if( myPID.GetMode() == MANUAL ) readAnlg1(); // if PID is off allow ANLG1 read
-    #else
+#else
       readAnlg1(); // if PID_CONTROL is not defined always allow ANLG1 read
-    #endif // PID_CONTROL
-  #endif // ANALOGUE1
-  #ifdef ANALOGUE2
+#endif // PID_CONTROL
+#endif // ANALOGUE1
+
+#ifdef ANALOGUE2
     readAnlg2();
-  #endif
+#endif
 
   // Run PID if defined and active
   #ifdef PID_CONTROL
