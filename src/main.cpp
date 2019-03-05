@@ -1469,24 +1469,39 @@ void setup()
 #endif
 
 #ifdef RESET_TIMER_BUTTON
-pinMode(RESET_TIMER_BUTTON, INPUT_PULLUP);
+  pinMode(RESET_TIMER_BUTTON, INPUT_PULLUP);
 #endif
 #ifdef TOGGLE_PID_BUTTON
-pinMode(TOGGLE_PID_BUTTON, INPUT_PULLUP);
+  pinMode(TOGGLE_PID_BUTTON, INPUT_PULLUP);
 #endif
 #ifdef MODE_BUTTON
-pinMode(MODE_BUTTON, INPUT_PULLUP);
+  pinMode(MODE_BUTTON, INPUT_PULLUP);
 #endif
 #ifdef ENTER_BUTTON
-pinMode(ENTER_BUTTON, INPUT_PULLUP);
+  pinMode(ENTER_BUTTON, INPUT_PULLUP);
 #endif
 
-first = true;
-counter = 3; // start counter at 3 to match with Artisan. Probably a better way to sync with Artisan???
-next_loop_time = millis() + looptime; // needed??
-
+  first = true;
+  counter = 3; // start counter at 3 to match with Artisan. Probably a better way to sync with Artisan???
+  next_loop_time = millis() + looptime; // needed??
 }
 
+
+static void handlePotis() {
+  // Read analogue POT values if defined
+#ifdef ANALOGUE1
+#ifdef PID_CONTROL
+      if( myPID.GetMode() == MANUAL ) readAnlg1(); // if PID is off allow ANLG1 read
+#else
+      readAnlg1(); // if PID_CONTROL is not defined always allow ANLG1 read
+#endif // PID_CONTROL
+#endif // ANALOGUE1
+
+#ifdef ANALOGUE2
+    readAnlg2();
+#endif
+
+}
 
 // -----------------------------------------------------------------
 void loop()
@@ -1514,18 +1529,7 @@ void loop()
   // Read temperatures
   get_samples();
 
-  // Read analogue POT values if defined
-#ifdef ANALOGUE1
-#ifdef PID_CONTROL
-      if( myPID.GetMode() == MANUAL ) readAnlg1(); // if PID is off allow ANLG1 read
-#else
-      readAnlg1(); // if PID_CONTROL is not defined always allow ANLG1 read
-#endif // PID_CONTROL
-#endif // ANALOGUE1
-
-#ifdef ANALOGUE2
-    readAnlg2();
-#endif
+  handlePotis();
 
   // Run PID if defined and active
   #ifdef PID_CONTROL
@@ -1570,14 +1574,17 @@ void loop()
   // wait until looptiom is expired. Check serial and buttons while waiting
   while( millis() < next_loop_time ) {
     checkSerial();  // Has a command been received?
+
   #ifdef LCDAPTER
-    #if not ( defined ROASTLOGGER || defined ARTISAN || defined ANDROID ) // Stops buttons being read unless in standalone mode. Added to fix crash (due to low memory?).
-      checkButtons();
-    #endif
+  #if not ( defined ROASTLOGGER || defined ARTISAN || defined ANDROID ) // Stops buttons being read unless in standalone mode. Added to fix crash (due to low memory?).
+    checkButtons();
   #endif
+  #endif /* #ifdef LCDAPTER */
+
   #if not ( defined ROASTLOGGER || defined ARTISAN || defined ANDROID ) // Stops buttons being read unless in standalone mode. Added to fix crash (due to low memory?).
     checkButtonPins();
   #endif
+
   }
 
   // Set next loop time and increment counter
