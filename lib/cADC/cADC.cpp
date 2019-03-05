@@ -130,26 +130,26 @@ int32_t cADC::readuV() {
   uint8_t readbuf[ADC_MAX_NBYTES];
   unsigned i;
   // resolution determines number of bytes requested
-  unsigned readlen = ((cfg & ADC_RES_MASK) == ADC_BITS_18) ? 3 : 2;
+  unsigned datalen = ((cfg & ADC_RES_MASK) == ADC_BITS_18) ? 3 : 2;
 
-  ASSERT(readlen <= sizeof(readbuf));
+  ASSERT(datalen <= sizeof(readbuf));
 
-  unsigned wirelen = Wire.requestFrom( a_adc, readlen);
-  if (wirelen < readlen) {
+  unsigned wirelen = Wire.requestFrom(a_adc, datalen + 1);
+  if (wirelen < datalen + 1) {
       // got less bytes than expected
-      ADC_PRINTF("# wire expected=%u, got=%u\n", readlen, wirelen);
+      ADC_PRINTF("# wire expected=%u, got=%u\n", datalen, wirelen);
       errors++;
       return INT32_MIN;
   }
 
-  for (i = 0; i  < readlen; i++) {
+  for (i = 0; i  < datalen; i++) {
     readbuf[i] = Wire._READ();
   }
 
   uint8_t stat = Wire._READ();
 
   if (stat & ADC_NOT_RDY) {
-      ADC_PRINTF("# adc NOT RDY stat=%08x\n", stat);
+      ADC_PRINTF("# adc !RDY stat=%02x\n", stat);
       errors++;
       return INT32_MIN;
   }
@@ -163,7 +163,7 @@ int32_t cADC::readuV() {
   v = ((uint32_t)readbuf[0] << 24) | ((uint32_t)readbuf[1] << 16) | ((uint32_t)readbuf[2] << 8);
 
   //shift to the correct value keeping sign
-  v >>= (8 * (sizeof(v) - readlen));
+  v >>= (8 * (sizeof(v) - datalen));
 
   v *= 1000;  // convert to uV.  This cannot overflow ( 10 bits + 18 bits < 31 bits )
 
