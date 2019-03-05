@@ -134,8 +134,10 @@ int32_t cADC::readuV() {
 
   ASSERT(readlen <= sizeof(readbuf));
 
-  if (Wire.requestFrom( a_adc, readlen) < readlen) {
+  unsigned wirelen = Wire.requestFrom( a_adc, readlen);
+  if (wirelen < readlen) {
       // got less bytes than expected
+      ADC_PRINTF("# wire expected=%u, got=%u\n", readlen, wirelen);
       errors++;
       return INT32_MIN;
   }
@@ -147,6 +149,7 @@ int32_t cADC::readuV() {
   uint8_t stat = Wire._READ();
 
   if (stat & ADC_NOT_RDY) {
+      ADC_PRINTF("# adc NOT RDY stat=%08x\n", stat);
       errors++;
       return INT32_MIN;
   }
@@ -196,6 +199,7 @@ void cADC::nextConversion( uint8_t chan ) {
   Wire._WRITE( cfg | ( ( chan & B00000011 ) << ADC_C0 ) );
   int ack = Wire.endTransmission();
   ASSERT(ack==0);
+  ADC_PRINTF("ADC got NACK\n");
 };
 
 // -------------------------------------
