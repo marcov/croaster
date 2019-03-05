@@ -28,7 +28,7 @@ extern char printfBuf[32];
 #if defined(ASSERT_ENABLED)
 #define ASSERT(condition) do { \
     if (condition) { \
-        __PRINTF("Assert failed %s:%d \n",__FILE__,__LINE__);\
+        __PRINTF("ASSRT %s:%d\n",__FILE__,__LINE__);\
     } \
 } while (0)
 #else
