@@ -148,7 +148,7 @@ int32_t cADC::readuV() {
 
   uint8_t stat = Wire._READ();
 
-  if (stat & ADC_NOT_RDY) {
+  if (stat & (1 << ADC_NOT_RDY)) {
       ADC_PRINTF("# adc !RDY stat=%02x\n", stat);
       errors++;
       return INT32_MIN;
