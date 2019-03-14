@@ -1,6 +1,7 @@
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
+#include <Arduino.h>
 #include "user.h"
 
 #if defined(CRSTR_SERIAL_DEBUG)

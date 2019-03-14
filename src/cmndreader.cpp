@@ -37,6 +37,9 @@
 
 // Version 1.10
 #include "cmndreader.h"
+#if defined(PID_TYPE_MV)
+#  include "pid.h"
+#endif /* #if defined(PID_TYPE_MV) */
 
 // define command objects (all are derived from CmndBase)
 readCmnd reader;
@@ -579,6 +582,9 @@ pidCmnd::pidCmnd() :
 void pidCmnd::pidON() {
      Output = 0; // turn PID output off, otherwise Iterm accumulates (this looks like a bug in Brett's code)
      myPID.SetMode( AUTOMATIC );
+#if defined(PID_TYPE_MV)
+     pid_start(SV, true, levelOT1);
+#endif /* #if defined(PID_TYPE_MV) */
       #ifdef ACKS_ON
       Serial.println(F("# PID turned ON"));
       #endif
@@ -624,7 +630,10 @@ boolean pidCmnd::doCommand( CmndParser* pars ) {
     else if( strcmp( pars->paramStr(1), "GO" ) == 0 ) {
       #ifdef PID_CONTROL
         counter = 0; // reset TC4 timer
-        myPID.SetMode(1); // turn PID on
+        myPID.SetMode( AUTOMATIC );
+#if defined(PID_TYPE_MV)
+        pid_start(SV, true, levelOT1);
+#endif /* #if defined(PID_TYPE_MV) */
         #ifdef ACKS_ON
         Serial.println(F("# PID Roast Start"));
         #endif
@@ -633,7 +642,7 @@ boolean pidCmnd::doCommand( CmndParser* pars ) {
     }
     else if( strcmp( pars->paramStr(1), "STOP" ) == 0 ) {
       #ifdef PID_CONTROL
-        myPID.SetMode(0); // turn PID off
+        myPID.SetMode(MANUAL); // turn PID off
         #ifdef PHASE_ANGLE_CONTROL
         #ifdef IO3_HTR_PAC
         levelIO3 = 0;
@@ -681,6 +690,9 @@ boolean pidCmnd::doCommand( CmndParser* pars ) {
       } else {
         myPID.SetTunings( kp, ki, kd, P_ON_E ); // Proportional on Error
      }
+#if defined(PID_TYPE_MV)
+     pid_tune(kp, ki, kd);
+#endif /* #if defined(PID_TYPE_MV) */
       #ifdef ACKS_ON
       Serial.print(F("# PID Tunings set.  ")); Serial.print(F("Kp = ")); Serial.print(kp); Serial.print(F(",  Ki = ")); Serial.print(ki); Serial.print(F(",  Kd = ")); Serial.println(kd);
       #endif

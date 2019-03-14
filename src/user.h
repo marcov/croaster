@@ -94,9 +94,11 @@
 #define PID_CONTROL
 #define PID_CHAN 1 // physical channel for PID input (corresponding to thermocouple inputs T1-T4)
 #define CT 1000 // default cycle time for the PID, in ms
-#define PRO 5.00 // initial proportional parameter
-#define INT 0.15 // initial integral parameter
-#define DER 0.00 // initial derivative parameter
+#define PRO 11.4 // initial proportional parameter
+#define INT 0.41 // initial integral parameter
+#define DER 79.8 // initial derivative parameter
+// Enable mv PID controller
+//#define PID_TYPE_MV
 
 //#define POM // enable Proportional on Measurement (NOTE: PID PARAMETERS WILL REQUIRE CHANGING). Disable for Proportional on Error.
 

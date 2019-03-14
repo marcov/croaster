@@ -193,6 +193,9 @@
 #endif
 
 #include "debug.h"
+#if defined(PID_TYPE_MV)
+#  include "pid.h"
+#endif /* #if defined(PID_TYPE_MV) */
 
 // ------------------------ other compile directives
 #define MIN_DELAY 300   // ms between ADC samples (tested OK at 270)
@@ -1453,11 +1456,17 @@ void setup()
   myPID.SetOutputLimits(MIN_OT1, MAX_OT1); // set output limits to user defined limits
 #endif
   myPID.SetControllerDirection(DIRECT); // set PID to be direct acting mode. Increase in output leads to increase in input
+
+  auto propOn = P_ON_E;
 #ifdef POM
-  myPID.SetTunings(PRO, INT, DER, P_ON_M); // set initial PID tuning values and set Proportional on Measurement mode
-#else
-  myPID.SetTunings(PRO, INT, DER, P_ON_E); // set initial PID tuning values and set Proportional on Error mode
+  propOn = P_ON_M;
 #endif
+  myPID.SetTunings(PRO, INT, DER, propOn); // set initial PID tuning values
+
+#if defined(PID_TYPE_MV)
+  pid_tune(PRO, INT, DER);
+#endif /* #if defined(PID_TYPE_MV) */
+
   myPID.SetMode(MANUAL); // start with PID control off
 #if not ( defined ROASTLOGGER || defined ARTISAN || defined ANDROID )
   profile_number = 1; // set default profile, 0 is for override by roasting software
@@ -1540,6 +1549,15 @@ void loop()
       // Input is the SV for the PID algorithm
       Input = convertUnits( T[k] );
       myPID.Compute();  // do PID calcs
+
+#if defined(PID_TYPE_MV)
+      pid_update_setpoint(Setpoint);
+      auto pidAbs = pid_get_control_value(Input);
+      auto pct = pid_abs_2_pct(pidAbs);
+      //DEBUG_PRINTF("#pid sp=%ld %ld%%\n",pidAbs, pct);
+      Output = pct;
+#endif /* #if defined(PID_TYPE_MV) */
+
 #ifdef IO3_HTR_PAC
       levelIO3 = Output; // update levelOT1 based on PID optput
       outIO3();
