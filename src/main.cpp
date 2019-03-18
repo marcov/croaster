@@ -197,6 +197,12 @@
 #  include "pid.h"
 #endif /* #if defined(PID_TYPE_MV) */
 
+#if defined(POM)
+#define PID_PON_MODE (P_ON_M)
+#else
+#define PID_PON_MODE (P_ON_E)
+#endif
+
 // ------------------------ other compile directives
 #define MIN_DELAY 300   // ms between ADC samples (tested OK at 270)
 #define DP 1  // decimal places for output on serial port
@@ -250,11 +256,8 @@ uint32_t checktime;
   double Setpoint, Input, Output, SV; // SV is for roasting software override of Setpoint
 
   //Specify the links and initial tuning parameters
-  #ifdef POM
-  PID myPID(&Input, &Output, &Setpoint,2,5,1,P_ON_M,DIRECT);
-  #else
-  PID myPID(&Input, &Output, &Setpoint,2,5,1,P_ON_E,DIRECT);
-  #endif
+  PID myPID(&Input, &Output, &Setpoint,2,5,1,PID_PON_MODE,DIRECT);
+
   uint8_t pid_chan = PID_CHAN; // identify PV and set default value from user.h
 
   int profile_number; // number of the profile for PID control
@@ -1457,11 +1460,7 @@ void setup()
 #endif
   myPID.SetControllerDirection(DIRECT); // set PID to be direct acting mode. Increase in output leads to increase in input
 
-  auto propOn = P_ON_E;
-#ifdef POM
-  propOn = P_ON_M;
-#endif
-  myPID.SetTunings(PRO, INT, DER, propOn); // set initial PID tuning values
+  myPID.SetTunings(PRO, INT, DER, PID_PON_MODE); // set initial PID tuning values
 
 #if defined(PID_TYPE_MV)
   pid_tune(PRO, INT, DER);
