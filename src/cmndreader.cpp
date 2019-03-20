@@ -41,6 +41,12 @@
 #  include "pid.h"
 #endif /* #if defined(PID_TYPE_MV) */
 
+#if defined(PID_TYPE_FLIGHT)
+#include "pidcontroller.hxx"
+extern PIDController flightPID;
+extern bool flightPID1st;
+#endif
+
 // define command objects (all are derived from CmndBase)
 readCmnd reader;
 awriteCmnd awriter;
@@ -585,6 +591,9 @@ void pidCmnd::pidON() {
 #if defined(PID_TYPE_MV)
      pid_start(SV, true, levelOT1);
 #endif /* #if defined(PID_TYPE_MV) */
+#if defined(PID_TYPE_FLIGHT)
+      flightPID1st=true;
+#endif
       #ifdef ACKS_ON
       Serial.println(F("# PID turned ON"));
       #endif
@@ -634,6 +643,9 @@ boolean pidCmnd::doCommand( CmndParser* pars ) {
 #if defined(PID_TYPE_MV)
         pid_start(SV, true, levelOT1);
 #endif /* #if defined(PID_TYPE_MV) */
+#if defined(PID_TYPE_FLIGHT)
+        flightPID1st=true;
+#endif
         #ifdef ACKS_ON
         Serial.println(F("# PID Roast Start"));
         #endif
@@ -693,6 +705,10 @@ boolean pidCmnd::doCommand( CmndParser* pars ) {
 #if defined(PID_TYPE_MV)
      pid_tune(kp, ki, kd);
 #endif /* #if defined(PID_TYPE_MV) */
+#if defined(PID_TYPE_FLIGHT)
+     flightPID.configure(kp, (float)(kp)/(float)(ki), (float)(kd)/(float)(kp), float(CT/1000));
+#endif
+
       #ifdef ACKS_ON
       Serial.print(F("# PID Tunings set.  ")); Serial.print(F("Kp = ")); Serial.print(kp); Serial.print(F(",  Ki = ")); Serial.print(ki); Serial.print(F(",  Kd = ")); Serial.println(kd);
       #endif

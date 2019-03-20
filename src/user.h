@@ -94,11 +94,37 @@
 #define PID_CONTROL
 #define PID_CHAN 1 // physical channel for PID input (corresponding to thermocouple inputs T1-T4)
 #define CT 1000 // default cycle time for the PID, in ms
+
+#if 0
 #define PRO 11.4 // initial proportional parameter
 #define INT 0.41 // initial integral parameter
 #define DER 79.8 // initial derivative parameter
+#endif
+
+#if 0
+#define PRO 3.0
+#define INT 0.22
+#define DER 70.0
+#endif
+
+
+//Kp = 6.79 Ki = 0.22 Kd = 52.62
+#if 0
+#define PRO 6.79f
+#define INT 0.22f
+#define DER 52.62f
+#endif
+
+// Kp = 6.33 Ki = 0.33 Kd = 30.72
+#define PRO 6.33f
+#define INT 0.33f
+#define DER 30.72f
+
 // Enable mv PID controller
 //#define PID_TYPE_MV
+
+// Enable FlightGear PID controller
+#define PID_TYPE_FLIGHT
 
 //#define POM // enable Proportional on Measurement (NOTE: PID PARAMETERS WILL REQUIRE CHANGING). Disable for Proportional on Error.
 

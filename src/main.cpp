@@ -197,6 +197,12 @@
 #  include "pid.h"
 #endif /* #if defined(PID_TYPE_MV) */
 
+#if defined(PID_TYPE_FLIGHT)
+#include "pidcontroller.hxx"
+PIDController flightPID;
+bool flightPID1st;
+#endif
+
 #if defined(POM)
 #define PID_PON_MODE (P_ON_M)
 #else
@@ -1466,6 +1472,10 @@ void setup()
   pid_tune(PRO, INT, DER);
 #endif /* #if defined(PID_TYPE_MV) */
 
+#if defined(PID_TYPE_FLIGHT)
+  flightPID.configure(PRO, (float)(PRO)/(float)(INT), (float)(DER)/(float)(PRO), float(CT/1000));
+#endif
+
   myPID.SetMode(MANUAL); // start with PID control off
 #if not ( defined ROASTLOGGER || defined ARTISAN || defined ANDROID )
   profile_number = 1; // set default profile, 0 is for override by roasting software
@@ -1540,7 +1550,7 @@ void loop()
   handlePotis();
 
   // Run PID if defined and active
-  #ifdef PID_CONTROL
+#ifdef PID_CONTROL
     if( myPID.GetMode() != MANUAL ) { // If PID in AUTOMATIC mode calc new output and assign to OT1
       updateSetpoint(); // read profile data from EEPROM and calculate new setpoint
       uint8_t k = pid_chan;  // k = physical channel
@@ -1557,6 +1567,14 @@ void loop()
       Output = pct;
 #endif /* #if defined(PID_TYPE_MV) */
 
+#if defined(PID_TYPE_FLIGHT)
+      static long prevTs = 0;
+      int now = millis();
+      flightPID.update(flightPID1st, now - prevTs);
+      flightPID1st = false;
+      prevTs = now;
+#endif
+
 #ifdef IO3_HTR_PAC
       levelIO3 = Output; // update levelOT1 based on PID optput
       outIO3();
@@ -1569,7 +1587,7 @@ void loop()
       Serial.print(F("# PID output = " )); Serial.println( levelOT1 );
       #endif
     }
-  #endif
+#endif
 
   // Update LCD if defined
   #if defined LCD_PARALLEL || defined LCDAPTER || defined LCD_I2C
