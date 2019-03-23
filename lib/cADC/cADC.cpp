@@ -168,10 +168,10 @@ int32_t cADC::readuV() {
   v *= 1000;  // convert to uV.  This cannot overflow ( 10 bits + 18 bits < 31 bits )
 
   // bit shift count for ADC gain
-  uint8_t gn = stat & ADC_GAIN_MASK;
+  uint8_t gain = stat & ADC_GAIN_MASK;
 
   // shift based on ADC resolution plus ADC gain
-  unsigned log2divisor = ( nLSB + gn ); // v = raw reading, uV
+  unsigned log2divisor = (nLSB + gain);
 
   if (log2divisor > 0) {
     // since we divide by shift, we always truncate the value.
@@ -183,14 +183,16 @@ int32_t cADC::readuV() {
     v += rounding;
   }
 
-  int deltaV = 0;
 
   if (cal_gain > 0.0) {
+    int deltaV = 0;
     // calculate effect of external calibration gain; minimize loss of significance
     deltaV = round( (float)v * cal_gain );
+    // returns corrected, unfiltered value of uV
+    v += deltaV;
   }
 
-  return v + deltaV;  // returns corrected, unfiltered value of uV
+  return v;
 };
 
 // -------------------------------------
