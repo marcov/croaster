@@ -109,16 +109,27 @@
 
 
 //Kp = 6.79 Ki = 0.22 Kd = 52.62
+// Kp = 6.33 Ki = 0.33 Kd = 30.72
 #if 0
 #define PRO 6.79f
 #define INT 0.22f
 #define DER 52.62f
 #endif
 
-// Kp = 6.33 Ki = 0.33 Kd = 30.72
-#define PRO 6.33f
-#define INT 0.33f
-#define DER 30.72f
+// 2.0, 0.15, 0.22
+#if 0
+#define PRO 2.0f
+#define INT 0.11f
+#define DER 22.0f
+#endif
+
+// MATLAB PID tune based on TF G(s) = Kp / (1 + Tp1 * s)
+// Kp = 2.2897
+// Tp1 = 46.544
+//
+#define PRO 0.7939f
+#define INT 0.1188f
+#define DER 0.0f
 
 // Enable mv PID controller
 //#define PID_TYPE_MV
