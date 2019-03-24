@@ -95,35 +95,8 @@
 #define PID_CHAN 1 // physical channel for PID input (corresponding to thermocouple inputs T1-T4)
 #define CT 1000 // default cycle time for the PID, in ms
 
-#if 0
-#define PRO 11.4 // initial proportional parameter
-#define INT 0.41 // initial integral parameter
-#define DER 79.8 // initial derivative parameter
-#endif
-
-#if 0
-#define PRO 3.0
-#define INT 0.22
-#define DER 70.0
-#endif
-
-
-//Kp = 6.79 Ki = 0.22 Kd = 52.62
-// Kp = 6.33 Ki = 0.33 Kd = 30.72
-#if 0
-#define PRO 6.79f
-#define INT 0.22f
-#define DER 52.62f
-#endif
-
-// 2.0, 0.15, 0.22
-#if 0
-#define PRO 2.0f
-#define INT 0.11f
-#define DER 22.0f
-#endif
-
-// MATLAB PID tune based on TF G(s) = Kp / (1 + Tp1 * s)
+// MATLAB PID tune based on open loop step:
+// TF G(s) = Kp / (1 + Tp1 * s)
 // Kp = 2.2897
 // Tp1 = 46.544
 //
@@ -131,11 +104,11 @@
 #define INT 0.1188f
 #define DER 0.0f
 
-// Enable mv PID controller
-//#define PID_TYPE_MV
-
 // Enable FlightGear PID controller
 #define PID_TYPE_FLIGHT
+
+// Enable mv PID controller
+//#define PID_TYPE_MV
 
 //#define POM // enable Proportional on Measurement (NOTE: PID PARAMETERS WILL REQUIRE CHANGING). Disable for Proportional on Error.
 
