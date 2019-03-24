@@ -180,7 +180,9 @@ int32_t cADC::readuV() {
 
     v >>= log2divisor;
 
-    v += rounding;
+    if (rounding != 0) {
+        v++;
+    }
   }
 
 
