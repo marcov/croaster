@@ -203,7 +203,7 @@ void cADC::nextConversion( uint8_t chan ) {
   Wire._WRITE( cfg | ( ( chan & B00000011 ) << ADC_C0 ) );
   int nack = Wire.endTransmission();
   ASSERT(nack==0);
-  if (nack) ADC_PRINTF("ADC got NACK\n");
+  if (nack) ADC_PRINTF("# adc got NACK\n");
 };
 
 // -------------------------------------
