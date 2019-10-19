@@ -1079,6 +1079,7 @@ void checkButtons() { // take action if a button is pressed
 void outOT1() { // update output for OT1
   uint8_t new_levelot1;
 #ifdef PHASE_ANGLE_CONTROL
+
 #ifdef IO3_HTR_PAC // OT1 not cutoff by fan duty in IO3_HTR_PAC mode
   new_levelot1 = levelOT1;
 #else
@@ -1088,8 +1089,10 @@ void outOT1() { // update output for OT1
   else {
     new_levelot1 = levelOT1;
   }
-#endif
+#endif /* #ifdef IO3_HTR_PAC */
+
   output_level_icc( new_levelot1 );
+
 #else // PWM Mode
   if ( levelIO3 < HTR_CUTOFF_FAN_VAL ) {
     new_levelot1 = 0;
@@ -1098,7 +1101,7 @@ void outOT1() { // update output for OT1
     new_levelot1 = levelOT1;
   }
   ssr.Out( new_levelot1, levelOT2 );
-#endif
+#endif /* #ifdef PHASE_ANGLE_CONTROL */
 
 }
 

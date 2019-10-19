@@ -100,8 +100,8 @@
 // Kp = 2.2897
 // Tp1 = 46.544
 //
-#define PRO 0.7939f
-#define INT 0.1188f
+#define PRO 0.70f
+#define INT 0.11f
 #define DER 0.0f
 
 // Enable FlightGear PID controller
@@ -126,7 +126,7 @@
 #define MAX_IO3 100  // Set output % for upper limit for IO3
 
 // cut power to Heater if fan duty is less than HTR_CUTOFF_FAN_VAL (to protect heater in air roaster). Set to 0 for no cutoff
-#define HTR_CUTOFF_FAN_VAL 0
+#define HTR_CUTOFF_FAN_VAL 20
 
 #define FAN_AUTO_COOL 100 // Set fan output duty for auto cool when using PID;STOP command
 
